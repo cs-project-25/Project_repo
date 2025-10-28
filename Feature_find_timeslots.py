@@ -1,8 +1,5 @@
-#placeholder
+#placeholder here we will write the code for finding free time slots
 
-print('it does work now')
-def hello(x=3):
-    return 4 + x
 
 
 
