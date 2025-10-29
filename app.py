@@ -1,5 +1,5 @@
 import streamlit as st
-
+st.title("This is our app")
 st.write("We connected everything")
 st.write("I'm losing my nerves")
 st.write("Changes can be done by collaborators")
