@@ -6,6 +6,7 @@ st.write("Changes can be done by collaborators")
 st.write("Hello")
 st.write("test2")
 st.write("another test")
+st.write("Best app ever!")
 
 
 
