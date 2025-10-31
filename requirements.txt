@@ -1,6 +1,6 @@
 streamlit
 pandas
 flask
-requets
+requests
 icalender
 sqlite-utils
