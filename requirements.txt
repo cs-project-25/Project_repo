@@ -2,5 +2,5 @@ streamlit
 pandas
 flask
 requests
-icalender
+icalendar
 sqlite-utils
