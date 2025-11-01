@@ -10,7 +10,7 @@ st.title("calendar")
 events = [
     {
         "title": "Kickoff",
-        "start": (dt.datetime.now() + dt.timedelta(days=1)).strftime("%Y-%m-%d"),
+        "start": (dt.timedelta(days=1)).strftime("%Y-%m-%d"),
     },
     {
         "title": "Sprint Review",
@@ -19,21 +19,17 @@ events = [
     },
 ]
 
-if "base_now" not in st.session_state:
-    st.session_state.base_now = dt.datetime.now().replace(microsecond=0)
 
-base = st.session_state.base_now
-
-# Optionen für die Darstellung
 cal_options = {
     "initialView": "dayGridMonth",   # Monatsansicht
     "height": 650,
-    "locale": "de",
+    "locale": "en",
     "weekNumbers": True,
     "selectable": True,
 }
 
 calendar(events=events, options=cal_options)
+
 
 
 
