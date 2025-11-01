@@ -10,7 +10,7 @@ st.title("calendar")
 events = [
     {
         "title": "Kickoff",
-        "start": (dt.timedelta(days=1)).strftime("%Y-%m-%d"),
+        "start": (dt.datetime.now() + dt.timedelta(days=1)).strftime("%Y-%m-%d"),
     },
     {
         "title": "Sprint Review",
@@ -29,6 +29,7 @@ cal_options = {
 }
 
 calendar(events=events, options=cal_options)
+
 
 
 
