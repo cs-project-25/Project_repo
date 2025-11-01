@@ -17,7 +17,8 @@ cal_options = {"initialView": "dayGridWeek",
     "weekNumbers": True,
     "selectable": True,}
 
-calendar(events=events, options=cal_options)
+calendar(events, cal_options)
+
 
 
 
