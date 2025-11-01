@@ -37,9 +37,10 @@ st.data_editor(
             step=60,
         ),
     },
-    hide_index=True,
+    hide_index=True,)
 
 calendar(events, formatting)
+
 
 
 
