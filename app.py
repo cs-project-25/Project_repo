@@ -14,10 +14,11 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 cal_options = {"initialView": "dayGridWeek",
     "height": 650,
     "locale": "en",
-    "weekNumbers": True,
+    "weekNumbers": False,
     "selectable": True,}
 
 calendar(events, cal_options)
+
 
 
 
