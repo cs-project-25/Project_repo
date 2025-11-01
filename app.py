@@ -11,13 +11,10 @@ base = st.session_state.base_now
 
 events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%Y-%m-%d")},{"title": "Sprint Review","start": (base + dt.timedelta(days=3, hours=14)).isoformat(),"end":   (base + dt.timedelta(days=3, hours=15)).isoformat(),},]
 
-cal_options = {"initialView": "dayGridWeek",
-    "height": 650,
-    "locale": "en",
-    "weekNumbers": False,
-    "selectable": True,}
+formatting = {"initialView": "dayGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True,}
 
-calendar(events, cal_options)
+calendar(events, formatting)
+
 
 
 
