@@ -14,12 +14,12 @@ base = st.session_state.base_now
 events = [
     {
         "title": "Kickoff",
-        "start": (dt.datetime.now() + dt.timedelta(days=1)).strftime("%Y-%m-%d"),
+        "start": (base + dt.timedelta(days=1)).strftime("%Y-%m-%d"),
     },
     {
         "title": "Sprint Review",
-        "start": (dt.datetime.now() + dt.timedelta(days=3, hours=14)).isoformat(),
-        "end":   (dt.datetime.now() + dt.timedelta(days=3, hours=15)).isoformat(),
+        "start": (base + dt.timedelta(days=3, hours=14)).isoformat(),
+        "end":   (base + dt.timedelta(days=3, hours=15)).isoformat(),
     },
 ]
 
@@ -33,6 +33,7 @@ cal_options = {
 }
 
 calendar(events=events, options=cal_options)
+
 
 
 
