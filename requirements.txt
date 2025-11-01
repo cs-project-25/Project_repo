@@ -4,3 +4,4 @@ flask
 requests
 icalendar
 sqlite-utils
+streamlit-calendar
