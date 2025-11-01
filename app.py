@@ -5,6 +5,10 @@ import datetime as dt
 
 st.title("calendar")
 
+if "base_now" not in st.session_state:
+    st.session_state.base_now = dt.datetime.now().replace(microsecond=0)
+base = st.session_state.base_now
+
 
 # Hier kannst du nun Events einfügen
 events = [
@@ -29,6 +33,7 @@ cal_options = {
 }
 
 calendar(events=events, options=cal_options)
+
 
 
 
