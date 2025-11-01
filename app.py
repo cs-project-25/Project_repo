@@ -3,17 +3,8 @@ import streamlit as st
 from streamlit_calendar import calendar
 import datetime as dt
 
-st.write("Python executable Streamlit is using:")
-st.code(sys.executable)
-
 st.title("calendar")
 
-
-
-
-st.title("This is the calendar")
-
-st.title("📆 Mein Kalender")
 
 # Hier kannst du nun Events einfügen
 events = [
@@ -28,6 +19,11 @@ events = [
     },
 ]
 
+if "base_now" not in st.session_state:
+    st.session_state.base_now = dt.datetime.now().replace(microsecond=0)
+
+base = st.session_state.base_now
+
 # Optionen für die Darstellung
 cal_options = {
     "initialView": "dayGridMonth",   # Monatsansicht
@@ -37,8 +33,8 @@ cal_options = {
     "selectable": True,
 }
 
-# 📅 Kalender anzeigen
 calendar(events=events, options=cal_options)
+
 
 
 
