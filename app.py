@@ -13,10 +13,8 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
-format = ("calendar")
-
-
 calendar(events, formatting)
+
 
 
 
