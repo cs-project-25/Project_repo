@@ -1,1 +1,13 @@
+## 📅 Event Calendar
+
+<iframe src="https://calendar.google.com/calendar/embed?src=deine_kalender_id&ctz=Europe%2FZurich"
+style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
+<html>
+<body>
+<h1>Project Events</h1>
+<iframe src="https://calendar.google.com/calendar/embed?src=deine_kalender_id&ctz=Europe/Zurich"
+style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+</body>
+</html>
 
