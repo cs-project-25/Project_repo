@@ -1,3 +1,7 @@
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+import hashlib
 def scrape_stgallen_events ():
     url = "https://www.m.stadt.sg.ch/vdpdd/de/index/veranstaltungen/veranstaltungskalender.html"
     response = requests.get(url)
