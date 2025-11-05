@@ -1,30 +1,44 @@
 import streamlit as st
 import pandas as pd
+import requests
+import io
 from datetime import datetime
 from streamlit_calendar import calendar
 
 st.set_page_config(page_title="SGBT Events Kalender", layout="wide")
 
-st.title("Veranstaltungen – St.Gallen-Bodensee Tourismus (Open Data)")
+st.title("🎉 Veranstaltungen – St.Gallen-Bodensee Tourismus (Open Data)")
 
 CSV_URL = "https://opendata.sgbt.contentdesk.io/api/Event.csv"
 
 @st.cache_data(ttl=3600)
 def load_events():
-    # robuster CSV-Import
+    response = requests.get(CSV_URL)
+    response.raise_for_status()
+    raw = response.text
+
+    cleaned = []
+    for line in raw.splitlines():
+        # Entferne Zeilen, die seltsam lange oder unvollständige Anführungszeichen haben
+        if line.count('"') % 2 != 0:
+            line = line.replace('"', '')  # Quotes komplett entfernen
+        cleaned.append(line)
+
+    cleaned_csv = "\n".join(cleaned)
+
     df = pd.read_csv(
-        CSV_URL,
-        sep=";",                # Trennzeichen ist oft Semikolon statt Komma
-        quotechar='"',          # Felder können Anführungszeichen enthalten
-        encoding="utf-8",       # sicherstellen, dass Umlaute korrekt sind
-        on_bad_lines="skip"     # Zeilen mit fehlerhafter Struktur überspringen
+        io.StringIO(cleaned_csv),
+        sep=";",          # Semikolon als Trennzeichen
+        engine="python",  # flexibler Parser, toleranter als C-engine
+        on_bad_lines="skip",
+        encoding="utf-8"
     )
     return df
 
 try:
     df = load_events()
 except Exception as e:
-    st.error(f"Fehler beim Laden der Eventdaten: {e}")
+    st.error(f"Fehler beim Laden oder Parsen der Eventdaten: {e}")
     st.stop()
 
 st.success(f"{len(df)} Events erfolgreich geladen!")
