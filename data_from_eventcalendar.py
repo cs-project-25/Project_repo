@@ -1,36 +1,44 @@
 import streamlit as st
-import requests
+import pandas as pd
 from datetime import datetime
 from streamlit_calendar import calendar
 
-st.set_page_config(page_title="SGBT Events", layout="wide")
+st.set_page_config(page_title="SGBT Events Kalender", layout="wide")
 
-st.title("🎉 Veranstaltungen – St.Gallen-Bodensee Tourismus")
+st.title("🎉 Veranstaltungen – St.Gallen-Bodensee Tourismus (Open Data)")
 
-API_URL = "https://opendata.sgbt.contentdesk.io/api/v1/events"
+CSV_URL = "https://opendata.sgbt.contentdesk.io/api/Event.csv"
 
-params = {
-    "limit": 50,  # Anzahl Events
-    # "category": "kultur"  # Beispiel: Filter nach Kategorie
-}
+@st.cache_data(ttl=3600)
+def load_events():
+    df = pd.read_csv(CSV_URL)
+    return df
 
 try:
-    response = requests.get(API_URL, params=params)
-    response.raise_for_status()
-    data = response.json()
+    df = load_events()
 except Exception as e:
-    st.error(f"Fehler beim Laden der API: {e}")
+    st.error(f"Fehler beim Laden der Eventdaten: {e}")
     st.stop()
-  
-events = []
-for item in data.get("data", []):
-    title = item.get("title", "Ohne Titel")
-    start_date = item.get("start_date")
-    end_date = item.get("end_date") or start_date
 
+st.success(f"{len(df)} Events erfolgreich geladen!")
+
+possible_columns = df.columns.str.lower()
+date_cols = [c for c in df.columns if "date" in c.lower()]
+title_col = next((c for c in df.columns if "title" in c.lower()), None)
+end_date_col = next((c for c in df.columns if "end" in c.lower() and "date" in c.lower()), None)
+start_date_col = next((c for c in df.columns if "start" in c.lower() or "datefrom" in c.lower()), None)
+
+if not (title_col and start_date_col):
+    st.error("Konnte keine Spalten für Titel und Startdatum finden.")
+    st.dataframe(df.head())
+    st.stop()
+
+events = []
+for _, row in df.iterrows():
     try:
-        start = datetime.fromisoformat(start_date)
-        end = datetime.fromisoformat(end_date)
+        title = str(row[title_col])
+        start = pd.to_datetime(row[start_date_col])
+        end = pd.to_datetime(row[end_date_col]) if end_date_col and not pd.isna(row[end_date_col]) else start
     except Exception:
         continue
 
@@ -38,7 +46,7 @@ for item in data.get("data", []):
         "title": title,
         "start": start.isoformat(),
         "end": end.isoformat(),
-        "color": "#1E88E5"  # optional: Eventfarbe
+        "color": "#007ACC"
     })
 
 calendar_options = {
@@ -49,4 +57,7 @@ calendar_options = {
 
 calendar(events=events, options=calendar_options)
 
-st.caption("Eventdaten via Open Data SGBT API")
+with st.expander("📊 Rohdaten anzeigen"):
+    st.dataframe(df.head())
+
+st.caption("Datenquelle: [opendata.sgbt.contentdesk.io](https://opendata.sgbt.contentdesk.io/api/Event.csv)")
