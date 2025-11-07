@@ -8,41 +8,60 @@ import datetime as dt
 # --- Google Calendar API Setup ---
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-def get_creds():
-    client_config = st.secrets["GOOGLE_OAUTH_CLIENT"]
-    flow = Flow.from_client_config(client_config, scopes=SCOPES)
-    flow.redirect_uri = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app/"
 
 
+import urllib.parse
+from google.oauth2.credentials import Credentials
 
+APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
 
+def get_google_creds():
+    # Wenn schon eingeloggt, gespeicherte Token wiederverwenden
+    if "gcal_token" in st.session_state:
+        return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
 
-    auth_url, _ = flow.authorization_url(
-        prompt='consent',
-        access_type='offline',
-        include_granted_scopes='true'
+    # Web-OAuth Flow
+    flow = Flow.from_client_config(
+        st.secrets["GOOGLE_OAUTH_CLIENT"],
+        scopes=SCOPES,
+        redirect_uri=APP_URL
     )
 
-    st.write("Bitte öffne diesen Link in einem neuen Tab und melde dich bei Google an:")
-    st.markdown(f"[🔗 Google Login Link]({auth_url})")
-    code = st.text_input("Füge hier den Autorisierungscode ein:")
+    qp = st.query_params
+    if "code" in qp:
+        # Google hat zurückgeleitet mit ?code=...
+        current_url = APP_URL
+        if qp:
+            current_url += "?" + urllib.parse.urlencode(qp, doseq=True)
+        flow.fetch_token(authorization_response=current_url)
+        creds = flow.credentials
 
-    if code:
-        try:
-            flow.fetch_token(code=code)
-            st.success("Login erfolgreich!")
-            return flow.credentials
-        except Exception as e:
-            st.error(f"Fehler beim Login: {e}")
-    return None
+        # Token speichern für spätere Requests
+        st.session_state["gcal_token"] = {
+            "token": creds.token,
+            "refresh_token": creds.refresh_token,
+            "token_uri": creds.token_uri,
+            "client_id": creds.client_id,
+            "client_secret": creds.client_secret,
+            "scopes": creds.scopes,
+        }
+        st.query_params.clear()
+        return creds
+    else:
+        # Noch kein Login: Button anzeigen
+        auth_url, _ = flow.authorization_url(
+            access_type="offline",
+            include_granted_scopes="true",
+            prompt="consent"
+        )
+        st.link_button("Mit Google verbinden", auth_url)
+        st.stop()
+
+creds = get_google_creds()
 
 
-# --- Streamlit App ---
-st.title("Team-Kalender")
 
-creds = None
-if st.button("Mit Google verbinden"):
-    creds = get_creds()
+
 
 # Nur wenn Login erfolgreich war:
 if creds:
@@ -104,6 +123,7 @@ formatting = {
 }
 
 calendar(demo_events, formatting)
+
 
 
 
