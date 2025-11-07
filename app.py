@@ -8,8 +8,22 @@ def get_creds():
     flow = InstalledAppFlow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"], SCOPES
     )
-    creds = flow.run_console()
-    return creds
+
+    # Verwende die "manuelle" Methode statt Browser oder Local Server
+    auth_url, _ = flow.authorization_url(prompt='consent')
+    st.write("Bitte öffne diesen Link in einem neuen Tab und melde dich bei Google an:")
+    st.markdown(f"[🔗 Google Login Link]({auth_url})")
+
+    # Eingabefeld für den Code
+    code = st.text_input("Füge hier den Autorisierungscode ein:")
+
+    if code:
+        flow.fetch_token(code=code)
+        st.success("Login erfolgreich!")
+        return flow.credentials
+    else:
+        return None
+
 
 st.title("Team-Kalender")
 
@@ -36,6 +50,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
