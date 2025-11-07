@@ -1,6 +1,8 @@
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import streamlit as st
+from googleapiclient.discovery import build
+
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
@@ -96,6 +98,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
