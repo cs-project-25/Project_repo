@@ -11,7 +11,11 @@ SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 def get_creds():
     client_config = st.secrets["GOOGLE_OAUTH_CLIENT"]
     flow = Flow.from_client_config(client_config, scopes=SCOPES)
-    flow.redirect_uri = "http://localhost"
+    if "streamlit.app" in st.secrets["GOOGLE_OAUTH_CLIENT"]["web"]["redirect_uris"][0]:
+        flow.redirect_uri = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
+    else:
+        flow.redirect_uri = "http://localhost"
+
 
     auth_url, _ = flow.authorization_url(
         prompt='consent',
@@ -100,4 +104,5 @@ formatting = {
 }
 
 calendar(demo_events, formatting)
+
 
