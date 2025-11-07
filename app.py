@@ -63,6 +63,72 @@ creds = get_google_creds()
 
 
 
+
+import streamlit as st
+from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+from googleapiclient.discovery import build
+from datetime import datetime, timedelta
+from streamlit_calendar import calendar
+import datetime as dt
+
+# --- Google Calendar API Setup ---
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
+
+
+import urllib.parse
+from google.oauth2.credentials import Credentials
+
+APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
+
+def get_google_creds():
+    # Wenn schon eingeloggt, gespeicherte Token wiederverwenden
+    if "gcal_token" in st.session_state:
+        return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
+
+    # Web-OAuth Flow
+    flow = Flow.from_client_config(
+        st.secrets["GOOGLE_OAUTH_CLIENT"],
+        scopes=SCOPES,
+        redirect_uri=APP_URL
+    )
+
+    qp = st.query_params
+    if "code" in qp:
+        # Google hat zurückgeleitet mit ?code=...
+        current_url = APP_URL
+        if qp:
+            current_url += "?" + urllib.parse.urlencode(qp, doseq=True)
+        flow.fetch_token(authorization_response=current_url)
+        creds = flow.credentials
+
+        # Token speichern für spätere Requests
+        st.session_state["gcal_token"] = {
+            "token": creds.token,
+            "refresh_token": creds.refresh_token,
+            "token_uri": creds.token_uri,
+            "client_id": creds.client_id,
+            "client_secret": creds.client_secret,
+            "scopes": creds.scopes,
+        }
+        st.query_params.clear()
+        return creds
+    else:
+        # Noch kein Login: Button anzeigen
+        auth_url, _ = flow.authorization_url(
+            access_type="offline",
+            include_granted_scopes="true",
+            prompt="consent"
+        )
+        st.link_button("Mit Google verbinden", auth_url)
+        st.stop()
+
+creds = get_google_creds()
+
+
+
+
+
 # Nur wenn Login erfolgreich war:
 if creds:
     try:
@@ -186,9 +252,6 @@ formatting = {
 }
 
 calendar(demo_events, formatting)
-
-
-
 
 
 
