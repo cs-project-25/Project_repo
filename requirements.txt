@@ -5,3 +5,7 @@ requests
 icalendar
 sqlite-utils
 streamlit-calendar
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
+python-dateutil
