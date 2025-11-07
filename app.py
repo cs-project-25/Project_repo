@@ -131,14 +131,20 @@ if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
 
-        # 👉 Zeitraum: von gestern bis in 30 Tage Zukunft (sicher, auch bei Zeitzonen)
-        time_min = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
-        time_max = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+        from datetime import datetime, timedelta, timezone
+
+        # Zeitraum: gestern bis +30 Tage Zukunft
+        time_min = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+
+        # Nur Events anzeigen, die in den letzten 30 Minuten neu erstellt oder geändert wurden
+        updated_min = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
 
         events_result = service.events().list(
             calendarId="primary",
             timeMin=time_min,
             timeMax=time_max,
+            updatedMin=updated_min,
             maxResults=100,
             singleEvents=True,
             orderBy="startTime",
@@ -181,9 +187,6 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
-
-
-
 
 
 
