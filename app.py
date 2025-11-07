@@ -15,6 +15,8 @@ def get_creds():
 
 
 
+
+
     auth_url, _ = flow.authorization_url(
         prompt='consent',
         access_type='offline',
@@ -102,6 +104,7 @@ formatting = {
 }
 
 calendar(demo_events, formatting)
+
 
 
 
