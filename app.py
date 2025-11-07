@@ -15,7 +15,7 @@ formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNu
 
 calendar(events, formatting)
 
-test1
+
 
 
 
