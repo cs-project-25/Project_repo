@@ -41,6 +41,44 @@ if st.button("Mit Google verbinden"):
 
 
 
+
+
+
+from datetime import datetime, timedelta
+
+# Google Calendar API-Client aufbauen
+service = build("calendar", "v3", credentials=creds)
+
+# Nächste 7 Tage abrufen
+now = datetime.utcnow().isoformat() + "Z"  # 'Z' = UTC-Zeit
+in_one_week = (datetime.utcnow() + timedelta(days=7)).isoformat() + "Z"
+
+events_result = (
+    service.events()
+    .list(
+        calendarId="primary",
+        timeMin=now,
+        timeMax=in_one_week,
+        maxResults=10,
+        singleEvents=True,
+        orderBy="startTime",
+    )
+    .execute()
+)
+events = events_result.get("items", [])
+
+# Anzeige in Streamlit
+if not events:
+    st.info("Keine Termine in den nächsten 7 Tagen gefunden.")
+else:
+    st.subheader("📅 Deine nächsten Termine:")
+    for event in events:
+        start = event["start"].get("dateTime", event["start"].get("date"))
+        st.write(f"**{event['summary']}** – {start}")
+
+
+
+
 import sys
 import streamlit as st
 from streamlit_calendar import calendar
@@ -58,6 +96,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
