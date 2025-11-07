@@ -1,7 +1,29 @@
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+import streamlit as st
+
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
+def get_creds():
+    flow = InstalledAppFlow.from_client_config(
+        st.secrets["GOOGLE_OAUTH_CLIENT"], SCOPES
+    )
+    creds = flow.run_local_server(port=0)
+    return creds
+
+st.title("Team-Kalender")
+
+if st.button("Mit Google verbinden"):
+    creds = get_creds()
+    st.success("Login erfolgreich!")
+
+
+
 import sys
 import streamlit as st
 from streamlit_calendar import calendar
 import datetime as dt
+
 
 st.title("calendar")
 
@@ -14,6 +36,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
