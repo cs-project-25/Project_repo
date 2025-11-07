@@ -128,81 +128,49 @@ creds = get_google_creds()
 
 
 
-
 # Nur wenn Login erfolgreich war:
 if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
 
-        # Nächste 7 Tage abrufen
+        # 👉 Zeitraum: 30 Tage (nicht nur 7)
         now = datetime.utcnow().isoformat() + "Z"
-        in_one_week = (datetime.utcnow() + timedelta(days=7)).isoformat() + "Z"
+        in_one_month = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
 
         events_result = service.events().list(
             calendarId="primary",
             timeMin=now,
-            timeMax=in_one_week,
-            maxResults=10,
+            timeMax=in_one_month,
+            maxResults=100,
             singleEvents=True,
             orderBy="startTime",
         ).execute()
 
         events = events_result.get("items", [])
 
+        # Wenn keine Events
         if not events:
-            st.info("Keine Termine in den nächsten 7 Tagen gefunden.")
+            st.info("Keine Termine im nächsten Monat gefunden.")
         else:
             st.subheader("📅 Deine nächsten Termine:")
+
+            google_events = []
             for event in events:
-                start = event["start"].get("dateTime", event["start"].get("date"))
-                st.write(f"**{event['summary']}** – {start}")
-
-    except Exception as e:
-        st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
-
-
-
-
-if creds:
-    try:
-        service = build("calendar", "v3", credentials=creds)
-
-        now = datetime.utcnow().isoformat() + "Z"
-        in_one_week = (datetime.utcnow() + timedelta(days=7)).isoformat() + "Z"
-
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=now,
-            timeMax=in_one_week,
-            maxResults=10,
-            singleEvents=True,
-            orderBy="startTime",
-        ).execute()
-
-        events = events_result.get("items", [])
-
-        if not events:
-            st.info("Keine Termine in den nächsten 7 Tagen gefunden.")
-        else:
-            st.subheader("📅 Deine nächsten Termine:")
-            google_events = []  # <-- neue Liste für Kalenderanzeige
-
-            for event in events:
+                summary = event.get("summary", "Ohne Titel")
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 end = event["end"].get("dateTime", event["end"].get("date"))
-                summary = event.get("summary", "Ohne Titel")
 
                 # Textanzeige (optional)
                 st.write(f"**{summary}** – {start}")
 
-                # Für Kalender vorbereiten
+                # Für Kalender-Widget vorbereiten
                 google_events.append({
                     "title": summary,
                     "start": start,
                     "end": end,
                 })
 
-            # ---- Kalenderanzeige ----
+            # --- Nur einmaliger Kalender-Aufruf ---
             st.subheader("Kalenderübersicht")
             formatting = {
                 "initialView": "timeGridWeek",
@@ -217,41 +185,6 @@ if creds:
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
 
-
-
-
-
-
-
-
-# --- Visualer Kalender ---
-st.subheader("Kalenderübersicht")
-
-if "base_now" not in st.session_state:
-    st.session_state.base_now = dt.datetime.now().replace(microsecond=0)
-base = st.session_state.base_now
-
-# Beispiel-Ereignisse (können später mit echten Daten ersetzt werden)
-demo_events = [
-    {"title": "Kickoff", "start": (base + dt.timedelta(days=1)).strftime("%Y-%m-%d")},
-    {
-        "title": "Sprint Review",
-        "start": (base + dt.timedelta(days=3, hours=14)).isoformat(),
-        "end": (base + dt.timedelta(days=3, hours=15)).isoformat(),
-        "allDay": False,
-    },
-]
-
-formatting = {
-    "initialView": "timeGridWeek",
-    "height": 650,
-    "locale": "de",
-    "weekNumbers": True,
-    "selectable": True,
-    "nowIndicator": True,
-}
-
-calendar(demo_events, formatting)
 
 
 
