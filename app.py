@@ -127,25 +127,22 @@ creds = get_google_creds()
 
 
 
-
-# Nur wenn Login erfolgreich war:
 if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
 
-# 👉 Zeitraum: von gestern bis in 30 Tage Zukunft (sicher, auch bei Zeitzonen)
-    time_min = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
-    time_max = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+        # 👉 Zeitraum: von gestern bis in 30 Tage Zukunft (sicher, auch bei Zeitzonen)
+        time_min = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
+        time_max = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
 
-    events_result = service.events().list(
-        calendarId="primary",
-        timeMin=time_min,
-        timeMax=time_max,
-        maxResults=100,
-        singleEvents=True,
-        orderBy="startTime",
-    ).execute()
-
+        events_result = service.events().list(
+            calendarId="primary",
+            timeMin=time_min,
+            timeMax=time_max,
+            maxResults=100,
+            singleEvents=True,
+            orderBy="startTime",
+        ).execute()
 
         events = events_result.get("items", [])
 
@@ -161,17 +158,16 @@ if creds:
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 end = event["end"].get("dateTime", event["end"].get("date"))
 
-                # Textanzeige (optional)
-                st.write(f"**{summary}** – {start}")
+                # Debug: Zeige alle Events in der Konsole
+                st.write(summary, start, end)
 
-                # Für Kalender-Widget vorbereiten
                 google_events.append({
                     "title": summary,
                     "start": start,
                     "end": end,
                 })
 
-            # --- Nur einmaliger Kalender-Aufruf ---
+            # Kalender anzeigen
             st.subheader("Kalenderübersicht")
             formatting = {
                 "initialView": "timeGridWeek",
@@ -185,6 +181,8 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+
+
 
 
 
