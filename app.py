@@ -133,18 +133,19 @@ if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
 
-        # 👉 Zeitraum: 30 Tage (nicht nur 7)
-        now = datetime.utcnow().isoformat() + "Z"
-        in_one_month = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+# 👉 Zeitraum: von gestern bis in 30 Tage Zukunft (sicher, auch bei Zeitzonen)
+time_min = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
+time_max = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
 
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=now,
-            timeMax=in_one_month,
-            maxResults=100,
-            singleEvents=True,
-            orderBy="startTime",
-        ).execute()
+events_result = service.events().list(
+    calendarId="primary",
+    timeMin=time_min,
+    timeMax=time_max,
+    maxResults=100,
+    singleEvents=True,
+    orderBy="startTime",
+).execute()
+
 
         events = events_result.get("items", [])
 
@@ -184,6 +185,7 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+
 
 
 
