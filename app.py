@@ -8,7 +8,7 @@ def get_creds():
     flow = InstalledAppFlow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"], SCOPES
     )
-    creds = flow.run_local_server(port=0)
+    creds = flow.run_console()
     return creds
 
 st.title("Team-Kalender")
@@ -36,6 +36,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
