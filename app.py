@@ -126,7 +126,6 @@ def get_google_creds():
 creds = get_google_creds()
 
 
-
 if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -137,14 +136,11 @@ if creds:
         time_min = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
         time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
 
-        # Nur Events anzeigen, die in den letzten 30 Minuten neu erstellt oder geändert wurden
-        updated_min = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
-
+        # Termine abrufen
         events_result = service.events().list(
             calendarId="primary",
             timeMin=time_min,
             timeMax=time_max,
-            updatedMin=updated_min,
             maxResults=100,
             singleEvents=True,
             orderBy="startTime",
@@ -152,7 +148,7 @@ if creds:
 
         events = events_result.get("items", [])
 
-        # Wenn keine Events
+        # Wenn keine Events gefunden wurden
         if not events:
             st.info("Keine Termine im nächsten Monat gefunden.")
         else:
@@ -164,7 +160,7 @@ if creds:
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 end = event["end"].get("dateTime", event["end"].get("date"))
 
-                # Debug: Zeige alle Events in der Konsole
+                # Debug: Zeige alle Events in der App
                 st.write(summary, start, end)
 
                 google_events.append({
@@ -187,6 +183,7 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+
 
 
 
