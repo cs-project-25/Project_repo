@@ -4,25 +4,33 @@ import streamlit as st
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-def get_creds():
-    flow = InstalledAppFlow.from_client_config(
-        st.secrets["GOOGLE_OAUTH_CLIENT"], SCOPES
-    )
+from google_auth_oauthlib.flow import Flow
+import streamlit as st
 
-    # Verwende die "manuelle" Methode statt Browser oder Local Server
-    auth_url, _ = flow.authorization_url(prompt='consent')
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
+def get_creds():
+    client_config = st.secrets["GOOGLE_OAUTH_CLIENT"]
+    flow = Flow.from_client_config(client_config, scopes=SCOPES)
+
+    # Hier explizit die Redirect-URI setzen, damit Google zufrieden ist
+    flow.redirect_uri = client_config["web"]["redirect_uris"][0]
+
+    auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline', include_granted_scopes='true')
+
     st.write("Bitte öffne diesen Link in einem neuen Tab und melde dich bei Google an:")
     st.markdown(f"[🔗 Google Login Link]({auth_url})")
-
-    # Eingabefeld für den Code
     code = st.text_input("Füge hier den Autorisierungscode ein:")
 
     if code:
-        flow.fetch_token(code=code)
-        st.success("Login erfolgreich!")
-        return flow.credentials
-    else:
-        return None
+        try:
+            flow.fetch_token(code=code)
+            st.success("Login erfolgreich!")
+            return flow.credentials
+        except Exception as e:
+            st.error(f"Fehler beim Login: {e}")
+    return None
+
 
 
 st.title("Team-Kalender")
@@ -50,6 +58,7 @@ events = [{"title": "Kickoff","start": (base + dt.timedelta(days=1)).strftime("%
 formatting = {"initialView": "timeGridWeek","height": 650,"locale": "en","weekNumbers": True,"selectable": True, "nowIndicator": True}
 
 calendar(events, formatting)
+
 
 
 
