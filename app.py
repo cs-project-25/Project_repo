@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from streamlit_calendar import calendar
 import datetime as dt
 
-# --- Google Calendar API Setup ---
+
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
@@ -16,11 +16,10 @@ from google.oauth2.credentials import Credentials
 APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
 
 def get_google_creds():
-    # Wenn schon eingeloggt, gespeicherte Token wiederverwenden
     if "gcal_token" in st.session_state:
         return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
 
-    # Web-OAuth Flow
+
     flow = Flow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"],
         scopes=SCOPES,
@@ -29,14 +28,12 @@ def get_google_creds():
 
     qp = st.query_params
     if "code" in qp:
-        # Google hat zurückgeleitet mit ?code=...
         current_url = APP_URL
         if qp:
             current_url += "?" + urllib.parse.urlencode(qp, doseq=True)
         flow.fetch_token(authorization_response=current_url)
         creds = flow.credentials
 
-        # Token speichern für spätere Requests
         st.session_state["gcal_token"] = {
             "token": creds.token,
             "refresh_token": creds.refresh_token,
@@ -48,7 +45,6 @@ def get_google_creds():
         st.query_params.clear()
         return creds
     else:
-        # Noch kein Login: Button anzeigen
         auth_url, _ = flow.authorization_url(
             access_type="offline",
             include_granted_scopes="true",
@@ -71,7 +67,7 @@ from datetime import datetime, timedelta
 from streamlit_calendar import calendar
 import datetime as dt
 
-# --- Google Calendar API Setup ---
+
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
@@ -82,11 +78,9 @@ from google.oauth2.credentials import Credentials
 APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
 
 def get_google_creds():
-    # Wenn schon eingeloggt, gespeicherte Token wiederverwenden
     if "gcal_token" in st.session_state:
         return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
 
-    # Web-OAuth Flow
     flow = Flow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"],
         scopes=SCOPES,
@@ -95,14 +89,12 @@ def get_google_creds():
 
     qp = st.query_params
     if "code" in qp:
-        # Google hat zurückgeleitet mit ?code=...
         current_url = APP_URL
         if qp:
             current_url += "?" + urllib.parse.urlencode(qp, doseq=True)
         flow.fetch_token(authorization_response=current_url)
         creds = flow.credentials
 
-        # Token speichern für spätere Requests
         st.session_state["gcal_token"] = {
             "token": creds.token,
             "refresh_token": creds.refresh_token,
@@ -114,7 +106,6 @@ def get_google_creds():
         st.query_params.clear()
         return creds
     else:
-        # Noch kein Login: Button anzeigen
         auth_url, _ = flow.authorization_url(
             access_type="offline",
             include_granted_scopes="true",
@@ -132,11 +123,10 @@ if creds:
 
         from datetime import datetime, timedelta, timezone
 
-        # Zeitraum: gestern bis +30 Tage Zukunft
         time_min = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
         time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
 
-        # Termine abrufen
+
         events_result = service.events().list(
             calendarId="primary",
             timeMin=time_min,
@@ -148,7 +138,7 @@ if creds:
 
         events = events_result.get("items", [])
 
-        # Wenn keine Events gefunden wurden
+
         if not events:
             st.info("Keine Termine im nächsten Monat gefunden.")
         else:
@@ -160,7 +150,6 @@ if creds:
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 end = event["end"].get("dateTime", event["end"].get("date"))
 
-                # Debug: Zeige alle Events in der App
                 st.write(summary, start, end)
 
                 google_events.append({
@@ -169,7 +158,7 @@ if creds:
                     "end": end,
                 })
 
-            # Kalender anzeigen
+
             st.subheader("Kalenderübersicht")
             formatting = {
                 "initialView": "timeGridWeek",
@@ -183,6 +172,7 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+
 
 
 
