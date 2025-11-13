@@ -64,11 +64,14 @@ creds = get_google_creds()
 if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
+        
 
         from datetime import datetime, timedelta, timezone
 
         time_min = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        
         time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+        
 
 
         events_result = service.events().list(
@@ -86,16 +89,14 @@ if creds:
         if not events:
             st.info("Keine Termine im nächsten Monat gefunden.")
         else:
-            st.subheader("📅 Deine nächsten Termine:")
+            st.subheader("Deine nächsten Termine:")
 
             google_events = []
             for event in events:
                 summary = event.get("summary", "Ohne Titel")
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 end = event["end"].get("dateTime", event["end"].get("date"))
-
                 st.write(summary, start, end)
-
                 google_events.append({
                     "title": summary,
                     "start": start,
@@ -116,6 +117,7 @@ if creds:
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+
 
 
 
