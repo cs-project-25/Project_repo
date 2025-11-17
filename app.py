@@ -1,24 +1,19 @@
 import streamlit as st
-from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from streamlit_calendar import calendar
-import datetime as dt
-
-
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-
-
-
 import urllib.parse
 from google.oauth2.credentials import Credentials
 
+
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
+
 
 def get_google_creds():
     if "gcal_token" in st.session_state:
         return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
-
 
     flow = Flow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"],
@@ -53,78 +48,72 @@ def get_google_creds():
         st.link_button("Mit Google verbinden", auth_url)
         st.stop()
 
+
 creds = get_google_creds()
-
-
-
-
-
-
 
 if creds:
     try:
         service = build("calendar", "v3", credentials=creds)
-        
-
-        from datetime import datetime, timedelta, timezone
 
         time_min = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
-        
         time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-        
 
+        # 🔥 Alle Kalender laden
+        cal_list = service.calendarList().list().execute()
+        calendars = cal_list.get("items", [])
 
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=time_min,
-            timeMax=time_max,
-            maxResults=100,
-            singleEvents=True,
-            orderBy="startTime",
-        ).execute()
+        google_events = []
 
-        events = events_result.get("items", [])
+        # 🔥 Für jeden Kalender die Events abfragen
+        for cal in calendars:
+            cal_id = cal["id"]
+            cal_summary = cal.get("summaryOverride", cal.get("summary", "Unbenannter Kalender"))
 
+            try:
+                events_result = service.events().list(
+                    calendarId=cal_id,
+                    timeMin=time_min,
+                    timeMax=time_max,
+                    maxResults=100,
+                    singleEvents=True,
+                    orderBy="startTime",
+                ).execute()
 
-        if not events:
-            st.info("Keine Termine im nächsten Monat gefunden.")
-        else:
-            st.subheader("Deine nächsten Termine:")
+                events = events_result.get("items", [])
 
-            google_events = []
-            for event in events:
-                summary = event.get("summary", "Ohne Titel")
-                start = event["start"].get("dateTime", event["start"].get("date"))
-                end = event["end"].get("dateTime", event["end"].get("date"))
-                st.write(summary, start, end)
-                google_events.append({
-                    "title": summary,
-                    "start": start,
-                    "end": end,
-                })
+                for event in events:
+                    summary = f"{cal_summary}: " + event.get("summary", "Ohne Titel")
+                    start = event["start"].get("dateTime", event["start"].get("date"))
+                    end = event["end"].get("dateTime", event["end"].get("date"))
 
+                    google_events.append({
+                        "title": summary,
+                        "start": start,
+                        "end": end,
+                    })
 
-            st.subheader("Kalenderübersicht")
-            formatting = {
-                "initialView": "timeGridWeek",
-                "height": 650,
-                "locale": "de",
-                "weekNumbers": True,
-                "selectable": True,
-                "nowIndicator": True,
-            }
-            calendar(google_events, formatting)
+            except Exception as e:
+                st.warning(f"Kalender '{cal_summary}' konnte nicht geladen werden: {e}")
+
+        # Sortieren nach Startzeit
+        google_events.sort(key=lambda x: x["start"])
+
+        st.subheader("Deine nächsten Termine (Alle Kalender):")
+
+        for ev in google_events:
+            st.write(ev["title"], ev["start"], ev["end"])
+
+        st.subheader("Kalenderübersicht")
+        formatting = {
+            "initialView": "timeGridWeek",
+            "height": 650,
+            "locale": "de",
+            "weekNumbers": True,
+            "selectable": True,
+            "nowIndicator": True,
+        }
+
+        calendar(google_events, formatting)
 
     except Exception as e:
         st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
-
-
-
-
-
-
-
-
-
-
-
