@@ -6,11 +6,12 @@ from streamlit_calendar import calendar
 import urllib.parse
 from google.oauth2.credentials import Credentials
 
-
+#Rights I grant to Google
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+#Redirect to my streamlit-website after Google-Login
 APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
 
-
+#If token from my previous login is still available in the session, it recreates th credentials objects so that I stay logged in (in the Google-account)
 def get_google_creds():
     if "gcal_token" in st.session_state:
         return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
@@ -93,21 +94,21 @@ if creds:
                     })
 
             except Exception as e:
-                st.warning(f"Kalender '{cal_summary}' konnte nicht geladen werden: {e}")
+                st.warning(f"Calendar '{cal_summary}' could not be started: {e}")
 
         # Sortieren nach Startzeit
         google_events.sort(key=lambda x: x["start"])
 
-        st.subheader("Deine nächsten Termine (Alle Kalender):")
+        st.subheader("Your upcoming appointments (All calendars):")
 
         for ev in google_events:
             st.write(ev["title"], ev["start"], ev["end"])
 
-        st.subheader("Kalenderübersicht")
+        st.subheader("Calendar overview")
         formatting = {
             "initialView": "timeGridWeek",
             "height": 650,
-            "locale": "de",
+            "locale": "en",
             "weekNumbers": True,
             "selectable": True,
             "nowIndicator": True,
@@ -116,4 +117,5 @@ if creds:
         calendar(google_events, formatting)
 
     except Exception as e:
-        st.error(f"Fehler beim Laden der Kalenderdaten: {e}")
+        st.error(f"Error loading calendar data: {e}")
+
