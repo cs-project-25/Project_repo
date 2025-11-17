@@ -11,11 +11,12 @@ SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 #Redirect to my streamlit-website after Google-Login
 APP_URL = "https://projectrepo-nelb9xkappkqy6bhbwcmqwp.streamlit.app"
 
-#If token from my previous login is still available in the session, it recreates th credentials objects so that I stay logged in (in the Google-account)
+#If token from my previous login is still available in the session, it recreates the credentials objects so that I stay logged in (in the Google-account)
 def get_google_creds():
     if "gcal_token" in st.session_state:
         return Credentials.from_authorized_user_info(st.session_state["gcal_token"], SCOPES)
-
+     
+    #Creates an OAuth flow using Google login, using my app's client_secret and client_id and requesting access to the calendar of the user that logs in with Google
     flow = Flow.from_client_config(
         st.secrets["GOOGLE_OAUTH_CLIENT"],
         scopes=SCOPES,
@@ -118,4 +119,5 @@ if creds:
 
     except Exception as e:
         st.error(f"Error loading calendar data: {e}")
+
 
