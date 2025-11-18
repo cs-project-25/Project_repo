@@ -121,19 +121,5 @@ if creds:
         st.error(f"Error loading calendar data: {e}")
 
 
-# Pilates-Termine abrufen
-from unisport_daten import get_pilates_events
 
-pilates_events = get_pilates_events()  # liefert Liste von Dicts mit start/end als datetime
-
-# In google_events für das Widget einfügen
-for ev in pilates_events:
-    google_events.append({
-        "title": ev["summary"],
-        "start": ev["start"].isoformat(),
-        "end": ev["end"].isoformat()
-    })
-
-# Widget anzeigen
-calendar(google_events, formatting)
 
