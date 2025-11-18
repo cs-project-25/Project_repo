@@ -122,6 +122,8 @@ if creds:
 
 
 # Pilates-Termine abrufen
+from unisport_daten.py import get_pilates_events
+
 pilates_events = get_pilates_events()  # liefert Liste von Dicts mit start/end als datetime
 
 # In google_events für das Widget einfügen
