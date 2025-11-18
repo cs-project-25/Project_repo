@@ -121,3 +121,17 @@ if creds:
         st.error(f"Error loading calendar data: {e}")
 
 
+# Pilates-Kurse abrufen
+pilates_events = get_pilates_events()
+
+# Alle Events in Google Calendar einfügen
+for ev in pilates_events:
+    event_body = {
+        "summary": ev["summary"],
+        "location": ev["location"],
+        "description": ev["description"],
+        "start": {"dateTime": ev["start"].isoformat(), "timeZone": "Europe/Zurich"},
+        "end": {"dateTime": ev["end"].isoformat(), "timeZone": "Europe/Zurich"},
+    }
+    created_event = service.events().insert(calendarId="primary", body=event_body).execute()
+    st.write(f"Event erstellt: {created_event.get('summary')} am {ev['start'].strftime('%d.%m.%Y %H:%M')}")
