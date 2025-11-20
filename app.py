@@ -47,7 +47,7 @@ def get_google_creds():
             include_granted_scopes="true",
             prompt="consent"
         )
-        st.link_button("Mit Google verbinden", auth_url)
+        st.link_button("Connect with Google", auth_url)
         st.stop()
 
 
@@ -69,7 +69,7 @@ if creds:
         # 🔥 Für jeden Kalender die Events abfragen
         for cal in calendars:
             cal_id = cal["id"]
-            cal_summary = cal.get("summaryOverride", cal.get("summary", "Unbenannter Kalender"))
+            cal_summary = cal.get("summaryOverride", cal.get("summary", "Unknown calendar"))
 
             try:
                 events_result = service.events().list(
@@ -84,7 +84,7 @@ if creds:
                 events = events_result.get("items", [])
 
                 for event in events:
-                    summary = f"{cal_summary}: " + event.get("summary", "Ohne Titel")
+                    summary = f"{cal_summary}: " + event.get("summary", "without titel")
                     start = event["start"].get("dateTime", event["start"].get("date"))
                     end = event["end"].get("dateTime", event["end"].get("date"))
 
@@ -119,6 +119,7 @@ if creds:
 
     except Exception as e:
         st.error(f"Error loading calendar data: {e}")
+
 
 
 
