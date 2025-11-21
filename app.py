@@ -122,11 +122,7 @@ if creds:
         #Sort all collected events from all calendars by their start time
         google_events.sort(key=lambda x: x["start"])
 
-        #Show a text list of upcoming events
-        st.subheader("Your upcoming appointments (All calendars):")
 
-        for ev in google_events:
-            st.write(ev["title"], ev["start"], ev["end"])
 
         #Show a visual calendar overview using streamlit-calendar
         st.subheader("Calendar overview")
@@ -145,6 +141,7 @@ if creds:
     #If anything goes wrong in the whole calendar loading process, show an error message
     except Exception as e:
         st.error(f"Error loading calendar data: {e}")
+
 
 
 
