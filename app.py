@@ -6,6 +6,8 @@ from streamlit_calendar import calendar
 import urllib.parse
 from google.oauth2.credentials import Credentials
 
+from appointment_data.excel_data import load_excel_events
+
 #Rights I grant to Google
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 #Redirect to my streamlit-website after Google-Login
@@ -123,6 +125,11 @@ if creds:
         google_events.sort(key=lambda x: x["start"])
 
 
+        excel_events = load_excel events()
+        all_events = google_events + excel_events
+        all_events.sort(key=lambda x: x["start"])
+
+
 
         #Show a visual calendar overview using streamlit-calendar
         st.subheader("Calendar overview")
@@ -136,7 +143,7 @@ if creds:
         }
 
         #Display all events in an interactive calendar view
-        calendar(google_events, formatting)
+        calendar(all_events, formatting)
 
     #If anything goes wrong in the whole calendar loading process, show an error message
     except Exception as e:
