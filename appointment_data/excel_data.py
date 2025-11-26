@@ -8,8 +8,6 @@ EXCEL_PATH = Path(__file__).parent / "appointments.xlsx"
 
 def load_excel_events():
     """Load appointments from Excel and convert to calendar events."""
-    st.write(f"🔍 Loading Excel from: {EXCEL_PATH}")
-
     try:
         df = pd.read_excel(EXCEL_PATH, engine="openpyxl")
 
@@ -18,10 +16,20 @@ def load_excel_events():
             st.error("appointments.xlsx must contain the columns: title, start, end")
             return []
 
-        df["start"] = pd.to_datetime(df["start"]).astype(str)
-        df["end"] = pd.to_datetime(df["end"]).astype(str)
+        events = []
+        for _, row in df.iterrows():
+            # Ensure datetime objects
+            start_dt = pd.to_datetime(row["start"])
+            end_dt = pd.to_datetime(row["end"])
+            
+            # Convert to ISO 8601 string with T separator
+            events.append({
+                "title": str(row["title"]),
+                "start": start_dt.strftime("%Y-%m-%dT%H:%M:%S"),
+                "end": end_dt.strftime("%Y-%m-%dT%H:%M:%S"),
+            })
 
-        return df.to_dict(orient="records")
+        return events
 
     except Exception as e:
         st.error(f"Error loading Excel data: {e}")
