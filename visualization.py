@@ -4,71 +4,110 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sns.set_theme(style="darkgrid")  # seaborn look
+sns.set_theme(style="darkgrid")
 
+
+# -----------------------------------------------------------
+# Convert events into a clean DataFrame
+# -----------------------------------------------------------
 def events_to_df(google_events):
     df = pd.DataFrame(google_events)
+
     df["start"] = pd.to_datetime(df["start"])
     df["end"] = pd.to_datetime(df["end"])
     df["calendar"] = df["title"].apply(lambda x: x.split(":")[0])
     df["weekday"] = df["start"].dt.day_name()
+
     return df
 
+
+# -----------------------------------------------------------
+# Plot: Number of events per calendar
+# -----------------------------------------------------------
 def plot_events_per_calendar(df):
     counts = df["calendar"].value_counts()
-    fig, ax = plt.subplots(figsize=(8,4))
+
+    fig, ax = plt.subplots(figsize=(8, 4))
     counts.plot(kind="bar", ax=ax)
-    ax.set_title("Anzahl Termine pro Kalender")
-    ax.set_ylabel("Termine")
-    ax.set_xlabel("Kalender")
+
+    ax.set_title("Number of Events per Calendar")
+    ax.set_ylabel("Events")
+    ax.set_xlabel("Calendar")
+
     st.pyplot(fig)
 
+
+# -----------------------------------------------------------
+# Plot: Distribution over weekdays
+# -----------------------------------------------------------
 def plot_events_per_weekday(df):
-    order = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+    order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     df["weekday"] = pd.Categorical(df["weekday"], categories=order, ordered=True)
+
     weekday_counts = df["weekday"].value_counts().sort_index()
-    fig, ax = plt.subplots(figsize=(8,4))
+
+    fig, ax = plt.subplots(figsize=(8, 4))
     weekday_counts.plot(kind="line", marker="o", ax=ax)
-    ax.set_title("Termine pro Wochentag")
-    ax.set_ylabel("Termine")
-    ax.set_xlabel("Wochentag")
+
+    ax.set_title("Events by Weekday")
+    ax.set_ylabel("Events")
+    ax.set_xlabel("Weekday")
+
     st.pyplot(fig)
 
+
+# -----------------------------------------------------------
+# Main visualization module (called from app.py)
+# -----------------------------------------------------------
 def show_visualizations(google_events):
-    st.subheader("📊 Datenvisualisierung")
+    st.subheader("📊 Data Visualization")
+
+    # Convert raw events to DataFrame
     df = events_to_df(google_events)
 
+    # Date range defaults (avoid min/max-value errors)
     min_date = df["start"].min().date()
     max_date = df["start"].max().date()
 
-    st.write("### Zeitraum auswählen")
+    st.write("### Select Date Range")
+
+    # 🚫 No min_value/max_value to avoid Streamlit errors
     dates = st.date_input(
-        "Zeitraum",
-        value=(min_date, max_date),
-        min_value=min_date,
-        max_value=max_date
+        "Date Range",
+        value=(min_date, max_date)
     )
 
-    if isinstance(dates, tuple):
+    # Handle both tuple and single-date return values
+    if isinstance(dates, tuple) and len(dates) == 2:
         start_date, end_date = dates
     else:
         start_date = end_date = dates
 
-    # Button für Anzeige
-    if st.button("Grafik anzeigen"):
+    if start_date > end_date:
+        st.warning("Start date cannot be after end date.")
+        return
+
+    st.write("### Show Visualization")
+    if st.button("Generate Chart"):
+        # Filter based on date selection
         mask = (df["start"].dt.date >= start_date) & (df["start"].dt.date <= end_date)
         df_filtered = df[mask]
 
         if df_filtered.empty:
-            st.warning("Keine Termine im ausgewählten Zeitraum.")
+            st.warning("No events in the selected time range.")
             return
 
-        option = st.selectbox(
-            "Welche Grafik möchtest du sehen?",
-            ["Wer hat die meisten Termine?", "Termine nach Wochentag"]
+        # Visualization selection
+        chart_type = st.selectbox(
+            "Select Chart Type",
+            [
+                "Events per Calendar",
+                "Events by Weekday"
+            ]
         )
 
-        if option == "Wer hat die meisten Termine?":
+        if chart_type == "Events per Calendar":
             plot_events_per_calendar(df_filtered)
-        else:
+
+        elif chart_type == "Events by Weekday":
             plot_events_per_weekday(df_filtered)
