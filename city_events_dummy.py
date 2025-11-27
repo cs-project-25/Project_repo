@@ -34,7 +34,9 @@ class CityEventScheduler:
         all_busy = []
         for user_events in calendar_events:
             for ev in user_events:
-                all_busy.append((ev["start"], ev["end"]))
+                # Nur gültige datetime-Werte verwenden
+                if isinstance(ev.get("start"), datetime) and isinstance(ev.get("end"), datetime):
+                    all_busy.append((ev["start"], ev["end"]))
 
         all_busy.sort(key=lambda x: x[0])
         free_slots = []

@@ -148,7 +148,7 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_dummy import CityEventScheduler
 
-st.subheader("City Event Suggestions (Weekly)")
+st.subheader("City Event Suggestions")
 
 scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
 
@@ -157,13 +157,16 @@ start_date = st.date_input("Start Date", datetime.now())
 end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 
 if st.button("Find Free Slots and Suggest Events"):
-    # Google-Kalender Events umwandeln
+    # Google-Kalender Events korrekt in datetime umwandeln
     calendar_events = []
     user_events = []
     for ev in google_events:  # google_events aus deinem bisherigen Code
-        start = datetime.fromisoformat(ev["start"])
-        end = datetime.fromisoformat(ev["end"])
-        user_events.append({"start": start, "end": end})
+        try:
+            start = datetime.fromisoformat(ev["start"])
+            end = datetime.fromisoformat(ev["end"])
+            user_events.append({"start": start, "end": end})
+        except Exception as e:
+            st.warning(f"Skipping event due to invalid date: {ev}, error: {e}")
     calendar_events.append(user_events)
 
     # Freie Slots berechnen
@@ -195,8 +198,7 @@ if st.button("Find Free Slots and Suggest Events"):
     else:
         st.write("No events fit into the available time slots.")
 
-
-
+        
 
 #Implementation of visualizing calendar data Natascha
 
