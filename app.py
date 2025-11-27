@@ -148,9 +148,10 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_module import CityEventScheduler
 
+st.set_page_config(page_title="Calendar & City Events", layout="wide")
 st.title("City Event Suggestions")
 
-# Scheduler initialisieren
+# --- Scheduler initialisieren ---
 try:
     scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
     st.success("Scheduler initialized correctly")
@@ -158,40 +159,41 @@ except Exception as e:
     st.error(f"Scheduler initialization failed: {e}")
     st.stop()
 
-# Zeitraum auswählen
+# --- Zeitraum auswählen ---
 start_date = st.date_input("Start Date", datetime.now())
 end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 
-# Button-gesteuert: Vorschläge nur nach Klick
+# --- Button-gesteuert: Freie Slots und City Events ---
 if st.button("Find Free Time Slots and Suggest Events"):
 
-    # --- Google-Kalender Events robust in datetime konvertieren ---
+    # --- Google-Kalender Events in datetime konvertieren ---
     calendar_events = []
     user_events = []
 
-    for ev in google_events:  # google_events aus deinem bisherigen Code
+    for ev in google_events:  # google_events muss aus deinem bestehenden Code geladen werden
         start_raw = ev.get("start")
         end_raw = ev.get("end")
 
         try:
             if not start_raw or not end_raw:
-                continue
+                continue  # überspringe Events ohne Start/End
 
-            if "T" in start_raw:
-                start = datetime.fromisoformat(start_raw)
-            else:
-                start = datetime.fromisoformat(start_raw + "T00:00:00")
+            # All-Day Event oder datetime
+            start = datetime.fromisoformat(start_raw) if "T" in start_raw else datetime.fromisoformat(start_raw + "T00:00:00")
+            end = datetime.fromisoformat(end_raw) if "T" in end_raw else datetime.fromisoformat(end_raw + "T23:59:59")
 
-            if "T" in end_raw:
-                end = datetime.fromisoformat(end_raw)
-            else:
-                end = datetime.fromisoformat(end_raw + "T23:59:59")
+            if isinstance(start, datetime) and isinstance(end, datetime):
+                user_events.append({"start": start, "end": end})
 
-            user_events.append({"start": start, "end": end})
         except Exception as e:
             st.warning(f"Skipping invalid event: {ev}, error: {e}")
 
     calendar_events.append(user_events)
+
+    # --- Debug: Prüfen der Typen ---
+    st.write("### Calendar Events Preview")
+    for ev in calendar_events[0]:
+        st.write(f"start: {ev['start']} ({type(ev['start'])}), end: {ev['end']} ({type(ev['end'])})")
 
     # --- Freie Slots berechnen ---
     free_slots = scheduler.find_common_free_slots(
@@ -221,6 +223,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
         st.dataframe(suggested)
     else:
         st.write("No events fit into the available time slots.")
+
 
 
 #Implementation of visualizing calendar data Natascha
