@@ -125,9 +125,6 @@ if creds:
         google_events.sort(key=lambda x: x["start"])
 
 
-
-
-
         #Show a visual calendar overview using streamlit-calendar
         st.subheader("Calendar overview")
         formatting = {
@@ -148,7 +145,60 @@ if creds:
 
 
 
-#Implementation of visualizing calendardata
+#Implementation of city events and time slot searcher Natascha
+from city_events_dummy import CityEventScheduler
+
+st.subheader("City Event Suggestions (Weekly)")
+
+scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
+
+# Zeitraum auswählen
+start_date = st.date_input("Start Date", datetime.now())
+end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
+
+if st.button("Find Free Slots and Suggest Events"):
+    # Google-Kalender Events umwandeln
+    calendar_events = []
+    user_events = []
+    for ev in google_events:  # google_events aus deinem bisherigen Code
+        start = datetime.fromisoformat(ev["start"])
+        end = datetime.fromisoformat(ev["end"])
+        user_events.append({"start": start, "end": end})
+    calendar_events.append(user_events)
+
+    # Freie Slots berechnen
+    free_slots = scheduler.find_common_free_slots(
+        calendar_events,
+        datetime.combine(start_date, datetime.min.time()),
+        datetime.combine(end_date, datetime.max.time())
+    )
+    st.write("### Free Slots (all users)")
+    if free_slots:
+        for s, e in free_slots:
+            st.write(f"{s} - {e}")
+    else:
+        st.write("No free slots available.")
+
+    # Stadt-Events laden und expandieren
+    weekly_events = scheduler.load_weekly_events_excel()
+    expanded_events = scheduler.expand_weekly_events(
+        weekly_events,
+        datetime.combine(start_date, datetime.min.time()),
+        datetime.combine(end_date, datetime.max.time())
+    )
+
+    # Vorschläge filtern
+    suggested = scheduler.suggest_events(free_slots, expanded_events)
+    st.write("### Suggested City Events")
+    if not suggested.empty:
+        st.dataframe(suggested)
+    else:
+        st.write("No events fit into the available time slots.")
+
+
+
+
+#Implementation of visualizing calendar data Natascha
 
 from visualization import show_visualizations
 show_visualizations(google_events)
