@@ -15,24 +15,24 @@ def events_to_df(google_events):
 
     df["start"] = pd.to_datetime(df["start"])
     df["end"] = pd.to_datetime(df["end"])
-    df["calendar"] = df["title"].apply(lambda x: x.split(":")[0])
+    df["person"] = df["title"].apply(lambda x: x.split(":")[0])
     df["weekday"] = df["start"].dt.day_name()
 
     return df
 
 
 # -----------------------------------------------------------
-# Plot: Number of events per calendar
+# Plot: Number of events per person
 # -----------------------------------------------------------
-def plot_events_per_calendar(df):
-    counts = df["calendar"].value_counts()
+def plot_events_per_person(df):
+    counts = df["person"].value_counts()
 
     fig, ax = plt.subplots(figsize=(8, 4))
     counts.plot(kind="bar", ax=ax)
 
-    ax.set_title("Number of Events per Calendar")
+    ax.set_title("Number of Events by Person")
     ax.set_ylabel("Events")
-    ax.set_xlabel("Calendar")
+    ax.set_xlabel("Person")
 
     st.pyplot(fig)
 
@@ -49,7 +49,7 @@ def plot_events_per_weekday(df):
     fig, ax = plt.subplots(figsize=(8, 4))
     weekday_counts.plot(kind="line", marker="o", ax=ax)
 
-    ax.set_title("Events by Weekday")
+    ax.set_title("Number of Events by Weekday")
     ax.set_ylabel("Events")
     ax.set_xlabel("Weekday")
 
@@ -100,7 +100,7 @@ def show_visualizations(google_events):
     chart_type = st.selectbox(
         "Chart Type",
         [
-            "Events per Calendar",
+            "Events by Person",
             "Events by Weekday"
         ]
     )
@@ -115,8 +115,8 @@ def show_visualizations(google_events):
     # ------------------------------------------------------------------
     # Plots
     # ------------------------------------------------------------------
-    if chart_type == "Events per Calendar":
-        plot_events_per_calendar(df_filtered)
+    if chart_type == "Events by Person":
+        plot_events_per_person(df_filtered)
 
     elif chart_type == "Events by Weekday":
         plot_events_per_weekday(df_filtered)
