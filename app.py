@@ -156,17 +156,30 @@ scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
 start_date = st.date_input("Start Date", datetime.now())
 end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 
-if st.button("Find Free Slots and Suggest Events"):
+if st.button("Find Free Time Slots and Suggest Events"):
     # Google-Kalender Events korrekt in datetime umwandeln
     calendar_events = []
     user_events = []
+
     for ev in google_events:  # google_events aus deinem bisherigen Code
         try:
-            start = datetime.fromisoformat(ev["start"])
-            end = datetime.fromisoformat(ev["end"])
+            start_raw = ev["start"]
+            end_raw = ev["end"]
+
+            # Unterstützt dateTime oder all-day date
+            if "T" in start_raw:
+                start = datetime.fromisoformat(start_raw)
+            else:
+                start = datetime.fromisoformat(start_raw + "T00:00:00")
+            if "T" in end_raw:
+                end = datetime.fromisoformat(end_raw)
+            else:
+                end = datetime.fromisoformat(end_raw + "T23:59:59")
+
             user_events.append({"start": start, "end": end})
         except Exception as e:
             st.warning(f"Skipping event due to invalid date: {ev}, error: {e}")
+
     calendar_events.append(user_events)
 
     # Freie Slots berechnen
@@ -175,6 +188,7 @@ if st.button("Find Free Slots and Suggest Events"):
         datetime.combine(start_date, datetime.min.time()),
         datetime.combine(end_date, datetime.max.time())
     )
+
     st.write("### Free Slots (all users)")
     if free_slots:
         for s, e in free_slots:
@@ -197,6 +211,7 @@ if st.button("Find Free Slots and Suggest Events"):
         st.dataframe(suggested)
     else:
         st.write("No events fit into the available time slots.")
+
 
         
 
