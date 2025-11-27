@@ -140,7 +140,7 @@ if creds:
         }
 
         #Display all events in an interactive calendar view
-        calendar(google_events, formatting)
+        calendar(google_events, formatting, key="google_calendar_main")
 
     #If anything goes wrong in the whole calendar loading process, show an error message
     except Exception as e:
