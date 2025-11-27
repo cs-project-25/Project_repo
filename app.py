@@ -146,19 +146,17 @@ if creds:
 
 
 #Implementation of city events and time slot searcher Natascha
-from city_events_dummy import CityEventScheduler
+from city_events_module import CityEventScheduler
 
-st.write("Testing find_common_free_slots method...")
+st.title("City Event Suggestions")
 
+# Scheduler initialisieren
 try:
-    test_slots = scheduler.find_common_free_slots([], datetime.now(), datetime.now() + timedelta(hours=1))
-    st.success("Method find_common_free_slots exists and works")
-except AttributeError:
-    st.error("Method find_common_free_slots not found in scheduler")
-
-st.subheader("City Event Suggestions")
-
-scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
+    scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
+    st.success("Scheduler initialized correctly")
+except Exception as e:
+    st.error(f"Scheduler initialization failed: {e}")
+    st.stop()
 
 # Zeitraum auswählen
 start_date = st.date_input("Start Date", datetime.now())
@@ -167,7 +165,7 @@ end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 # Button-gesteuert: Vorschläge nur nach Klick
 if st.button("Find Free Time Slots and Suggest Events"):
 
-    # --- Schritt 1: Google-Kalender Events robust in datetime konvertieren ---
+    # --- Google-Kalender Events robust in datetime konvertieren ---
     calendar_events = []
     user_events = []
 
@@ -179,7 +177,6 @@ if st.button("Find Free Time Slots and Suggest Events"):
             if not start_raw or not end_raw:
                 continue
 
-            # All-Day oder datetime Event
             if "T" in start_raw:
                 start = datetime.fromisoformat(start_raw)
             else:
@@ -196,7 +193,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
 
     calendar_events.append(user_events)
 
-    # --- Schritt 2: Freie Slots berechnen ---
+    # --- Freie Slots berechnen ---
     free_slots = scheduler.find_common_free_slots(
         calendar_events,
         datetime.combine(start_date, datetime.min.time()),
@@ -210,7 +207,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
     else:
         st.write("No free slots available.")
 
-    # --- Schritt 3: Stadt-Events laden und expandieren ---
+    # --- City-Events laden und Vorschläge filtern ---
     weekly_events = scheduler.load_weekly_events_excel()
     expanded_events = scheduler.expand_weekly_events(
         weekly_events,
@@ -218,7 +215,6 @@ if st.button("Find Free Time Slots and Suggest Events"):
         datetime.combine(end_date, datetime.max.time())
     )
 
-    # --- Schritt 4: Vorschläge filtern ---
     suggested = scheduler.suggest_events(free_slots, expanded_events)
     st.write("### Suggested City Events")
     if not suggested.empty:
