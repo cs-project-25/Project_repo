@@ -148,15 +148,6 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_dummy import CityEventScheduler
 
-st.write("### Checking Google Events")
-for i, ev in enumerate(google_events):
-    start = ev.get("start")
-    end = ev.get("end")
-    if not start or not end:
-        st.warning(f"Event #{i} is missing start or end: {ev}")
-    else:
-        st.write(f"Event #{i}: start={start}, end={end}")
-
 st.subheader("City Event Suggestions")
 
 scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
@@ -165,7 +156,7 @@ scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
 start_date = st.date_input("Start Date", datetime.now())
 end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 
-# Button-gesteuert: Vorschläge nur bei Klick
+# Button-gesteuert: Vorschläge nur nach Klick
 if st.button("Find Free Time Slots and Suggest Events"):
 
     # --- Schritt 1: Google-Kalender Events robust in datetime konvertieren ---
@@ -175,12 +166,12 @@ if st.button("Find Free Time Slots and Suggest Events"):
     for ev in google_events:  # google_events aus deinem bisherigen Code
         start_raw = ev.get("start")
         end_raw = ev.get("end")
+
         try:
-            # überspringe Events ohne Datum
-            if start_raw is None or end_raw is None:
+            if not start_raw or not end_raw:
                 continue
 
-            # All-Day Event oder datetime
+            # All-Day oder datetime Event
             if "T" in start_raw:
                 start = datetime.fromisoformat(start_raw)
             else:
@@ -226,7 +217,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
         st.dataframe(suggested)
     else:
         st.write("No events fit into the available time slots.")
-        
+
 
 #Implementation of visualizing calendar data Natascha
 
