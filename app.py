@@ -148,12 +148,14 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_dummy import CityEventScheduler
 
-st.write("Checking scheduler...")
-try:
-    scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
-    st.success("Scheduler initialized correctly")
-except Exception as e:
-    st.error(f"Scheduler initialization failed: {e}")
+st.write("### Checking Google Events")
+for i, ev in enumerate(google_events):
+    start = ev.get("start")
+    end = ev.get("end")
+    if not start or not end:
+        st.warning(f"Event #{i} is missing start or end: {ev}")
+    else:
+        st.write(f"Event #{i}: start={start}, end={end}")
 
 st.subheader("City Event Suggestions")
 
