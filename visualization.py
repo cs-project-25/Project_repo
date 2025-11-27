@@ -60,18 +60,13 @@ def plot_events_per_weekday(df):
 # Main visualization module (called from app.py)
 # -----------------------------------------------------------
 def show_visualizations(google_events):
-    st.subheader("📊 Data Visualization")
+    st.subheader("Data Visualization")
 
-    # Convert raw events to DataFrame
     df = events_to_df(google_events)
 
-    # Date range defaults (avoid min/max-value errors)
     min_date = df["start"].min().date()
     max_date = df["start"].max().date()
 
-    st.write("### Select Date Range")
-
-    # 🚫 No min_value/max_value to avoid Streamlit errors
     dates = st.date_input(
         "Date Range",
         value=(min_date, max_date)
@@ -87,27 +82,41 @@ def show_visualizations(google_events):
         st.warning("Start date cannot be after end date.")
         return
 
-    st.write("### Show Visualization")
+    # ------------------------------------------------------------------
+    # IMPORTANT FIX: Persistent button state
+    # ------------------------------------------------------------------
+    if "show_plot" not in st.session_state:
+        st.session_state.show_plot = False
+
     if st.button("Generate Chart"):
-        # Filter based on date selection
-        mask = (df["start"].dt.date >= start_date) & (df["start"].dt.date <= end_date)
-        df_filtered = df[mask]
+        st.session_state.show_plot = True
 
-        if df_filtered.empty:
-            st.warning("No events in the selected time range.")
-            return
+    # Stop here unless user has clicked the button
+    if not st.session_state.show_plot:
+        return
 
-        # Visualization selection
-        chart_type = st.selectbox(
-            "Select Chart Type",
-            [
-                "Events per Calendar",
-                "Events by Weekday"
-            ]
-        )
+    st.write("### Select Chart Type")
 
-        if chart_type == "Events per Calendar":
-            plot_events_per_calendar(df_filtered)
+    chart_type = st.selectbox(
+        "Chart Type",
+        [
+            "Events per Calendar",
+            "Events by Weekday"
+        ]
+    )
 
-        elif chart_type == "Events by Weekday":
-            plot_events_per_weekday(df_filtered)
+    mask = (df["start"].dt.date >= start_date) & (df["start"].dt.date <= end_date)
+    df_filtered = df[mask]
+
+    if df_filtered.empty:
+        st.warning("No events in the selected time range.")
+        return
+
+    # ------------------------------------------------------------------
+    # Plots
+    # ------------------------------------------------------------------
+    if chart_type == "Events per Calendar":
+        plot_events_per_calendar(df_filtered)
+
+    elif chart_type == "Events by Weekday":
+        plot_events_per_weekday(df_filtered)
