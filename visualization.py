@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
 
-sns.set_theme(style="darkgrid")  # Vorgabe vom Prof: seaborn "look"
+sns.set_theme(style="darkgrid") 
 
-# -------------------------
+
 # Hilfsfunktion:
 # Konvertiert deine google_events Liste in ein DataFrame
 # -------------------------
@@ -35,9 +35,9 @@ def plot_events_per_calendar(df):
 
     fig, ax = plt.subplots(figsize=(8, 4))
     counts.plot(kind="bar", ax=ax)
-    ax.set_title("Anzahl Termine pro Kalender")
-    ax.set_ylabel("Termine")
-    ax.set_xlabel("Kalender")
+    ax.set_title("Number of Events per Calendar")
+    ax.set_ylabel("Events")
+    ax.set_xlabel("Calendar")
     st.pyplot(fig)
 
 
@@ -53,9 +53,9 @@ def plot_events_per_weekday(df):
 
     fig, ax = plt.subplots(figsize=(8, 4))
     weekday_counts.plot(kind="line", marker="o", ax=ax)
-    ax.set_title("Termine pro Wochentag")
-    ax.set_ylabel("Termine")
-    ax.set_xlabel("Wochentag")
+    ax.set_title("Events per Weekday")
+    ax.set_ylabel("Events")
+    ax.set_xlabel("Weekday")
     st.pyplot(fig)
 
 
@@ -63,7 +63,7 @@ def plot_events_per_weekday(df):
 # Hauptfunktion: UI + Filter + Graph auswählen
 # -------------------------
 def show_visualizations(google_events):
-    st.subheader("📊 Datenvisualisierung")
+    st.subheader("Data visualization")
 
     df = events_to_df(google_events)
 
@@ -71,9 +71,9 @@ def show_visualizations(google_events):
     min_date = df["start"].min().date()
     max_date = df["start"].max().date()
 
-    st.write("### Zeitraum auswählen")
+    st.write("### Choose period:")
     start_date, end_date = st.date_input(
-        "Zeitraum",
+        "period",
         value=(min_date, max_date),
         min_value=min_date,
         max_value=max_date
@@ -84,16 +84,16 @@ def show_visualizations(google_events):
     df_filtered = df[mask]
 
     if df_filtered.empty:
-        st.warning("Keine Termine im ausgewählten Zeitraum.")
+        st.warning("No events found in the selected period.")
         return
 
     # Welche Grafik?
     option = st.selectbox(
-        "Welche Grafik möchtest du sehen?",
-        ["Wer hat die meisten Termine?", "Termine nach Wochentag"]
+        "Which visualization do you want to see?",
+        ["Who has the most events?", "Events per weekday?"]
     )
 
-    if option == "Wer hat die meisten Termine?":
+    if option == "Who has the most events?":
         plot_events_per_calendar(df_filtered)
     else:
         plot_events_per_weekday(df_filtered)

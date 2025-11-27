@@ -148,16 +148,9 @@ if creds:
 
 
 
-#Implementation der Visualisierung Kalenderdaten 
+#Implementation of visualizing calendardata
 
 from visualization import show_visualizations
-
-# ...
-
-# Kalenderanzeige wie bisher
-calendar(google_events, formatting)
-
-# danach:
 show_visualizations(google_events)
 
 
