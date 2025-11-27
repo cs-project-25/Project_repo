@@ -148,6 +148,13 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_dummy import CityEventScheduler
 
+st.write("Checking scheduler...")
+try:
+    scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
+    st.success("Scheduler initialized correctly")
+except Exception as e:
+    st.error(f"Scheduler initialization failed: {e}")
+
 st.subheader("City Event Suggestions")
 
 scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
