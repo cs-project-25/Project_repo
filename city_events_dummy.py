@@ -29,33 +29,48 @@ class CityEventScheduler:
             current_date += timedelta(days=1)
         return pd.DataFrame(events)
 
-    def find_common_free_slots(self, calendar_events, start_range, end_range, min_duration=timedelta(hours=1)):
-        """Berechnet freie Slots, die allen Nutzern passen"""
-        all_busy = []
-        for user_events in calendar_events:
-            for ev in user_events:
-                start = ev.get("start")
-                end = ev.get("end")
-                if isinstance(start, datetime) and isinstance(end, datetime):
-                    all_busy.append((start, end))
 
-        all_busy.sort(key=lambda x: x[0])
-        free_slots = []
-        current_start = start_range
+def find_common_free_slots(self, calendar_events, start_range, end_range, min_duration=timedelta(hours=1)):
+    """Berechnet freie Slots, die allen Nutzern passen"""
+    all_busy = []
+    for user_events in calendar_events:
+        for ev in user_events:
+            start = ev.get("start")
+            end = ev.get("end")
 
-        for busy_start, busy_end in all_busy:
-            if busy_start > current_start:
-                slot_end = busy_start
-                if slot_end - current_start >= min_duration:
-                    free_slots.append((current_start, slot_end))
-            if busy_end > current_start:
-                current_start = busy_end
+            # Robust: nur gültige datetime-Werte verwenden
+            if isinstance(start, str):
+                try:
+                    start = datetime.fromisoformat(start)
+                except Exception:
+                    continue
+            if isinstance(end, str):
+                try:
+                    end = datetime.fromisoformat(end)
+                except Exception:
+                    continue
 
-        if end_range > current_start:
-            if end_range - current_start >= min_duration:
-                free_slots.append((current_start, end_range))
+            if isinstance(start, datetime) and isinstance(end, datetime):
+                all_busy.append((start, end))
 
-        return free_slots
+    # Sortieren nach Startzeit
+    all_busy.sort(key=lambda x: x[0])
+    free_slots = []
+    current_start = start_range
+
+    for busy_start, busy_end in all_busy:
+        if busy_start > current_start:
+            slot_end = busy_start
+            if slot_end - current_start >= min_duration:
+                free_slots.append((current_start, slot_end))
+        if busy_end > current_start:
+            current_start = busy_end
+
+    if end_range > current_start:
+        if end_range - current_start >= min_duration:
+            free_slots.append((current_start, end_range))
+
+    return free_slots
 
     def suggest_events(self, free_slots, events_df):
         """Filtert Events, die in freie Slots passen"""

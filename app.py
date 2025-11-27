@@ -156,21 +156,27 @@ scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
 start_date = st.date_input("Start Date", datetime.now())
 end_date = st.date_input("End Date", datetime.now() + timedelta(days=7))
 
+# Button-gesteuert: Vorschläge nur bei Klick
 if st.button("Find Free Time Slots and Suggest Events"):
-    # Google-Kalender Events korrekt in datetime umwandeln
+
+    # --- Schritt 1: Google-Kalender Events robust in datetime konvertieren ---
     calendar_events = []
     user_events = []
 
     for ev in google_events:  # google_events aus deinem bisherigen Code
+        start_raw = ev.get("start")
+        end_raw = ev.get("end")
         try:
-            start_raw = ev["start"]
-            end_raw = ev["end"]
+            # überspringe Events ohne Datum
+            if start_raw is None or end_raw is None:
+                continue
 
-            # Unterstützt dateTime oder all-day date
+            # All-Day Event oder datetime
             if "T" in start_raw:
                 start = datetime.fromisoformat(start_raw)
             else:
                 start = datetime.fromisoformat(start_raw + "T00:00:00")
+
             if "T" in end_raw:
                 end = datetime.fromisoformat(end_raw)
             else:
@@ -178,11 +184,11 @@ if st.button("Find Free Time Slots and Suggest Events"):
 
             user_events.append({"start": start, "end": end})
         except Exception as e:
-            st.warning(f"Skipping event due to invalid date: {ev}, error: {e}")
+            st.warning(f"Skipping invalid event: {ev}, error: {e}")
 
     calendar_events.append(user_events)
 
-    # Freie Slots berechnen
+    # --- Schritt 2: Freie Slots berechnen ---
     free_slots = scheduler.find_common_free_slots(
         calendar_events,
         datetime.combine(start_date, datetime.min.time()),
@@ -196,7 +202,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
     else:
         st.write("No free slots available.")
 
-    # Stadt-Events laden und expandieren
+    # --- Schritt 3: Stadt-Events laden und expandieren ---
     weekly_events = scheduler.load_weekly_events_excel()
     expanded_events = scheduler.expand_weekly_events(
         weekly_events,
@@ -204,15 +210,13 @@ if st.button("Find Free Time Slots and Suggest Events"):
         datetime.combine(end_date, datetime.max.time())
     )
 
-    # Vorschläge filtern
+    # --- Schritt 4: Vorschläge filtern ---
     suggested = scheduler.suggest_events(free_slots, expanded_events)
     st.write("### Suggested City Events")
     if not suggested.empty:
         st.dataframe(suggested)
     else:
         st.write("No events fit into the available time slots.")
-
-
         
 
 #Implementation of visualizing calendar data Natascha
