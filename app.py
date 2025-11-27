@@ -148,6 +148,14 @@ if creds:
 #Implementation of city events and time slot searcher Natascha
 from city_events_dummy import CityEventScheduler
 
+st.write("Testing find_common_free_slots method...")
+
+try:
+    test_slots = scheduler.find_common_free_slots([], datetime.now(), datetime.now() + timedelta(hours=1))
+    st.success("Method find_common_free_slots exists and works")
+except AttributeError:
+    st.error("Method find_common_free_slots not found in scheduler")
+
 st.subheader("City Event Suggestions")
 
 scheduler = CityEventScheduler("dummy_city_events_weekly.xlsx")
