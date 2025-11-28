@@ -167,7 +167,7 @@ if st.button("Find Free Time Slots and Suggest Events"):
     # --- Google-Kalender Events robust in datetime konvertieren ---
     calendar_events = []
     user_events = []
-  for ev in google_events:  # google_events aus deinem bisherigen Code
+    for ev in google_events:  # google_events aus deinem bisherigen Code
         start_raw = ev.get("start")
         end_raw = ev.get("end")
 
