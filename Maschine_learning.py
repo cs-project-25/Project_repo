@@ -9,7 +9,7 @@ import pytz
 
 TZ = pytz.timezone("Europe/Zurich")
 
-def load_events_excel(path="data/events.xlsx"):
+def load_events_excel(path="data/events.xlsx"): #read events from excel sheet --> right connection!!
     df = pd.read_excel(path)
     # ensure datetimes are tz-aware in Zurich
     for col in ["start_datetime","end_datetime"]:
