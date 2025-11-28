@@ -61,7 +61,7 @@ if st.button("Vorschläge generieren"):
     users_busy[uid] = busy
 
   slots = find_common_free_slots(users_busy, window_start, window_end,slot_length_minutes=slot_len, step_minutes=step_minutes, min_attendees=min_attendees)
-slot_length_minutes=slot_len, step_minutes=step_minutes, min_attendees=min_attendees)
+
 
 st.success(f"{len(slots)} mögliche gemeinsame Slots gefunden")
 
